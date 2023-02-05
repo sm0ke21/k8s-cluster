@@ -1,0 +1,6 @@
+- name: Default
+  hosts: target
+  roles:
+  - containerd
+  - k8s
+  - istio

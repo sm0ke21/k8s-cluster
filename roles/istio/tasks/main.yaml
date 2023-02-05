@@ -1,0 +1,27 @@
+- name: Download Istio
+  ansible.builtin.get_url:
+    url: https://istio.io/downloadIstio
+    dest: /tmp/istio.sh
+    mode: '0777'
+  environment: 
+    ISTIO_VERSION: "{{istio_version}}"
+    TARGET_ARCH: x86_64
+
+- name: Unarchive Istio
+  ansible.builtin.shell: sh istio.sh
+  args:
+    chdir: /tmp
+
+- name: Install Istio
+  ansible.builtin.shell: ./bin/istioctl install --set profile=demo -y
+  args:
+    chdir: "/tmp/istio-{{istio_version}}"
+  become: true
+  environment: 
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: Label default namespace
+  ansible.builtin.shell: kubectl label namespace default istio-injection=enabled
+  become: true
+  environment: 
+    KUBECONFIG: /etc/kubernetes/admin.conf

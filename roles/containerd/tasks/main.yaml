@@ -1,0 +1,44 @@
+- name: Configure containerd modules
+  ansible.builtin.copy:
+    src: containerd.conf
+    dest: /etc/modules-load.d/containerd.conf
+    mode: '0777'
+  become: true
+
+- name: Set up containerd executable
+  ansible.builtin.copy:
+    src: containerd
+    dest: /
+    mode: '0777'
+  become: true
+
+- name: Create containerd dir
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+  become: true
+
+- name: Create containerd config
+  ansible.builtin.shell: /containerd/containerd config default > /etc/containerd/config.toml
+  become: true
+
+- name: Enable cgroup driver in containerd config
+  replace:
+    path: /etc/containerd/config.toml
+    regexp: '^([\s\t]*)(SystemdCgroup = false)([\s\t]*)$'
+    replace: '\1SystemdCgroup = true\3'
+  become: true
+
+- name: Copy systemctl containerd file
+  ansible.builtin.copy:
+    src: containerd.service
+    dest: /etc/systemd/system/containerd.service
+    mode: '0777'
+  become: true
+
+- name: Enable / Start containerd systemd service
+  ansible.builtin.systemd:
+    name: containerd
+    state: restarted
+    enabled: true
+  become: true

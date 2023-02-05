@@ -1,0 +1,11 @@
+- name: Configure sysctl
+  ansible.builtin.copy:
+    src: 99-kubernetes-k8s.conf
+    dest: /etc/sysctl.d/99-kubernetes-k8s.conf
+    mode: '0777'
+  become: true
+
+- name: Run sysctl commands
+  ansible.builtin.command:
+    cmd: "sysctl --system"
+  become: true

@@ -1,0 +1,28 @@
+- name: Install prerequisites
+  ansible.builtin.apt:
+    pkg:
+    - gnupg
+    - gnupg2
+    - curl
+    - software-properties-common 
+  become: true
+
+- name: Unmount swap
+  ansible.builtin.command:
+    cmd: "swapoff -a"
+  become: true
+
+- name: Disable swap
+  replace:
+    path: /etc/fstab
+    regexp: '^[^#*](.*swap.*)$'
+    replace: '# \1'
+  become: true
+
+- name: Enable modules using modprobe
+  ansible.builtin.command:
+    cmd: "modprobe {{item}}"
+  with_items:
+    - "overlay"
+    - "br_netfilter"
+  become: true
